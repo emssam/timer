@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>수업용 타이머 프로그램</title>
+</head>
+<body>
+  <h1>수업용 타이머 프로그램</h1>
+  <div id="timer-container">
+    <button id="attendance" onclick="startTimer(this, 5 * 60, '출석을 시작합니다.')">출석하기 (5분)</button>
+    <button id="typing" onclick="startTimer(this, 10 * 60, '타자연습을 시작합니다.', 5 * 60, '5분이 지났어요')">타자연습 (10분)</button>
+    <button id="class-start" onclick="startTimer(this, 30 * 60, '수업을 시작합니다.')">수업시작 (30분)</button>
+    <button id="class-end">수업종료</button>
+  </div>
+  <p id="timer-text">00:00:00</p>
+  <button id="stop-timer">타이머 멈추기</button>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    const speech = new SpeechSynthesisUtterance();
+    speech.lang = "ko-KR";
+
+    function startTimer(button, seconds, message, midPointMessage = null) {
+      const timerText = document.getElementById("timer-text");
+      const intervalId = setInterval(() => {
+        seconds--;
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        timerText.textContent = `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+
+        if (seconds === 0) {
+          clearInterval(intervalId);
+          if (midPointMessage) {
+            speech.text = midPointMessage;
+            window.speechSynthesis.speak(speech);
+          }
+          button.classList.remove("active");
+          if (button.id === "class-end") {
+            // 수업 종료 시 처리
+          } else {
+            // 다음 단계로 이동
+            const nextButton = document.getElementById(button.id + 1);
+            if (nextButton) {
+              nextButton.classList.add("active");
+              startTimer(nextButton, nextButton.dataset.seconds, nextButton.dataset.message);
+            }
+          }
+        }
+      }, 1000);
+
+      speech.text = message;
+      window.speechSynthesis.speak(speech);
+      button.classList.add("active");
+    }
+
+    document.getElementById("class-end").addEventListener("click", () => {
+      // 수업 종료 버튼 클릭 시 처리
+    });
+
+    const stopTimerButton = document.getElementById("stop-timer");
+    stopTimerButton.addEventListener("click", () => {
+      clearInterval(intervalId);
+      // 멈춘 시간을 저장하는 코드 추가
+      // ...
+    });
+  </script>
+</body>
+</html>
